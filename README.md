@@ -1,7 +1,7 @@
 # Classify_Annotation
 
   CNV_annotation is a software suite script that uses the ACE and ClassifyCNV packages
-for annotating gains and losses of CNV and predicting list of dosage-sensitive genes
+for annotating gains and losses of CNVs and predicting list of dosage-sensitive genes
 that affect as pathogenic variant.
 
 # Installation:
