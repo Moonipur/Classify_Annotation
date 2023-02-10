@@ -41,23 +41,19 @@ done
 
 NAME=`echo ${name}| cut -d. -f1`
 
-if [ ! -e ${outdir} ]
+if [ ! -z ${outdir} ]
 then
-    if [ -d ${outdir} ]
-    then
-        cd ${outdir}
-        OUTDIR=`pwd`
-        cd ${cur_dir}
-    else
-        echo -e "Error: Your output directory path; ${outdir} is NOT exist!"
-        exit
-elif [ -e ${outdir} ]
-then
+    OUTDIR=${outdir}
+else
     OUTDIR=`pwd`
 fi
 
-GEN_ACE_hg19() {
-    echo -e "#!/usr/bin/env Rscript" > ${OUTDIR}/ACE_SCRIPT_hg19.R
+#Step 1
+echo -e ">> 1ST: The ACE scipt is generating and reading using the ACE software"
+conda activate Rdevtools
+if [ "${ref}" = "hg19" ]
+then
+    echo "#!/usr/bin/env Rscript" > ${OUTDIR}/ACE_SCRIPT_hg19.R
     echo -e "" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
     echo -e "library(QDNAseq)" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
     echo -e "" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
@@ -78,12 +74,12 @@ GEN_ACE_hg19() {
     echo -e "" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
     echo -e "models <- data.frame(segmentdf)" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
     echo -e "write.table(models, file.path('${NAME}_segmentation.tsv'), quote = FALSE, " >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "            sep = '\t', na = '', row.names = FALSE)" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+    echo "            sep = '\t', na = '', row.names = FALSE)" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
     echo -e "" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-}
-
-GEN_ACE_hg38() {
-    echo -e "#!/usr/bin/env Rscript" > ${OUTDIR}/ACE_SCRIPT_hg38.R
+    Rscript ${OUTDIR}/ACE_SCRIPT_hg19.R
+elif [ "${ref}" = "hg38" ]
+then
+    echo "#!/usr/bin/env Rscript" > ${OUTDIR}/ACE_SCRIPT_hg38.R
     echo -e "" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
     echo -e "library(QDNAseq)" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
     echo -e "library(QDNAseq.hg38)" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
@@ -104,20 +100,8 @@ GEN_ACE_hg38() {
     echo -e "" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
     echo -e "models <- data.frame(segmentdf)" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
     echo -e "write.table(models, file.path('${NAME}_segmentation.tsv'), quote = FALSE, " >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "            sep = '\t', na = '', row.names = FALSE)" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+    echo "            sep = '\t', na = '', row.names = FALSE)" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
     echo -e "" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-}
-
-#Step 1
-echo -e ">> 1ST: The ACE scipt is generating and reading using the ACE software"
-conda activate Rdevtools
-if [ "${ref}" = "hg19" ]
-then
-    GEN_ACE_hg19()
-    Rscript ${OUTDIR}/ACE_SCRIPT_hg19.R
-elif [ "${ref}" = "hg38" ]
-then
-    GEN_ACE_hg38()
     Rscript ${OUTDIR}/ACE_SCRIPT_hg38.R
 fi
 conda deactivate
