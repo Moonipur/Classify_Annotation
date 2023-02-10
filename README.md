@@ -6,6 +6,8 @@ that affect as pathogenic variant.
 
 # Installation:
 
+  chmod +x *
+
   ./Install.sh
   
   source ~/.bashrc (find your .bashrc path before use source command)
