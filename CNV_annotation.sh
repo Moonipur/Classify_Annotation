@@ -7,7 +7,7 @@ cur_dir=`pwd`
 Help() {
     echo "usage: CNV_annotation [-i|-o|-r|h]"
     echo "description: CNV_annotation is a software suite script that uses the ACE and ClassifyCNV packages"
-    echo "             for annotating gains and losses reads and predicting list of dosage-sensitive genes"
+    echo "             for annotating gains and losses of CNVs and predicting list of dosage-sensitive genes"
     echo "             that affect as pathogenic variant."
     echo "optional argruments:"
     echo "    -i       Input file path (BAM file)"
