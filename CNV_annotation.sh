@@ -43,7 +43,9 @@ NAME=`echo ${name}| cut -d. -f1`
 
 if [ ! -z ${outdir} ]
 then
-    OUTDIR=${outdir}
+    cd ${outdir}
+    OUTDIR=`pwd`
+    cd ${cur_dir}
 else
     OUTDIR=`pwd`
 fi
@@ -53,70 +55,89 @@ echo -e ">> 1ST: The ACE scipt is generating and reading using the ACE software"
 conda activate Rdevtools
 if [ "${ref}" = "hg19" ]
 then
-    echo "#!/usr/bin/env Rscript" > ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "library(QDNAseq)" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "library(ACE)" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "bins <- getBinAnnotations(binSize=100, genome='hg19')" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "readCounts <- binReadCounts(bins)" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "readCountsFiltered <- applyFilters(readCounts, residual=TRUE, blacklist=TRUE)" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "readCountsFiltered <- estimateCorrection(readCountsFiltered)" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "copyNumbers <- correctBins(readCountsFiltered)" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "copyNumbersNormalized <- normalizeBins(copyNumbers)" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "copyNumbersSmooth <- smoothOutlierBins(copyNumbersNormalized)" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "copyNumbersSegmented <- segmentBins(copyNumbersSmooth, transformFun='sqrt')" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "object <- copyNumbersSegmented" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "template <- objectsampletotemplate(object,index=1)" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "segmentdf <- getadjustedsegments(template, cellularity = 0.25)" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "sqmodel <- squaremodel(template, prows = 150, ptop = 3.3, pbottom = 1.8, " >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "                       penalty = 0.5, penploidy = 0.5)" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "models <- data.frame(segmentdf)" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "write.table(models, file.path('${NAME}_segmentation.tsv'), quote = FALSE, " >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo "            sep = '\t', na = '', row.names = FALSE)" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    echo -e "" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
-    Rscript ${OUTDIR}/ACE_SCRIPT_hg19.R
+    if [ ! -f ${OUTDIR}/ACE_SCRIPT_hg19.R ]
+    then
+        echo "#!/usr/bin/env Rscript" > ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo '' >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo 'library(QDNAseq)' >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo '' >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo 'library(ACE)' >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo 'bins <- getBinAnnotations(binSize=100, genome="hg19")' >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo 'readCounts <- binReadCounts(bins)' >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo 'readCountsFiltered <- applyFilters(readCounts, residual=TRUE, blacklist=TRUE)' >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo 'readCountsFiltered <- estimateCorrection(readCountsFiltered)' >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo 'copyNumbers <- correctBins(readCountsFiltered)' >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo 'copyNumbersNormalized <- normalizeBins(copyNumbers)' >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo 'copyNumbersSmooth <- smoothOutlierBins(copyNumbersNormalized)' >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo 'copyNumbersSegmented <- segmentBins(copyNumbersSmooth, transformFun="sqrt")' >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo 'object <- copyNumbersSegmented' >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo 'template <- objectsampletotemplate(object,index=1)' >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo 'segmentdf <- getadjustedsegments(template, cellularity = 0.25)' >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo 'sqmodel <- squaremodel(template, prows = 150, ptop = 3.3, pbottom = 1.8, ' >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo '                       penalty = 0.5, penploidy = 0.5)' >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo '' >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo 'models <- data.frame(segmentdf)' >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo -e "write.table(models, file.path('${OUTDIR}/${NAME}_segmentation.tsv'), quote = FALSE, " >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo "            sep = '\t', na = '', row.names = FALSE)" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        echo "" >> ${OUTDIR}/ACE_SCRIPT_hg19.R
+        Rscript ${OUTDIR}/ACE_SCRIPT_hg19.R
+    else
+        if [ ! -f ${OUTDIR}/${NAME}_segmentation.tsv ]
+        then
+            Rscript ${OUTDIR}/ACE_SCRIPT_hg19.R
+        fi
+    fi
 elif [ "${ref}" = "hg38" ]
 then
-    echo "#!/usr/bin/env Rscript" > ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "library(QDNAseq)" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "library(QDNAseq.hg38)" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "library(ACE)" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "bins <- getBinAnnotations(binSize=100, genome='hg38')" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "readCounts <- binReadCounts(bins)" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "readCountsFiltered <- applyFilters(readCounts, residual=TRUE, blacklist=TRUE)" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "readCountsFiltered <- estimateCorrection(readCountsFiltered)" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "copyNumbers <- correctBins(readCountsFiltered)" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "copyNumbersNormalized <- normalizeBins(copyNumbers)" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "copyNumbersSmooth <- smoothOutlierBins(copyNumbersNormalized)" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "copyNumbersSegmented <- segmentBins(copyNumbersSmooth, transformFun='sqrt')" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "object <- copyNumbersSegmented" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "template <- objectsampletotemplate(object,index=1)" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "segmentdf <- getadjustedsegments(template, cellularity = 0.25)" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "sqmodel <- squaremodel(template, prows = 150, ptop = 3.3, pbottom = 1.8, " >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "                       penalty = 0.5, penploidy = 0.5)" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "models <- data.frame(segmentdf)" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "write.table(models, file.path('${NAME}_segmentation.tsv'), quote = FALSE, " >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo "            sep = '\t', na = '', row.names = FALSE)" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    echo -e "" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
-    Rscript ${OUTDIR}/ACE_SCRIPT_hg38.R
+    if [ ! -f ${OUTDIR}/ACE_SCRIPT_hg38.R ]
+    then
+        echo "#!/usr/bin/env Rscript" > ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo '' >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo 'library(QDNAseq)' >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo 'library(QDNAseq.hg38)' >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo 'library(ACE)' >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo 'bins <- getBinAnnotations(binSize=100, genome="hg38")' >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo 'readCounts <- binReadCounts(bins)' >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo 'readCountsFiltered <- applyFilters(readCounts, residual=TRUE, blacklist=TRUE)' >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo 'readCountsFiltered <- estimateCorrection(readCountsFiltered)' >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo 'copyNumbers <- correctBins(readCountsFiltered)' >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo 'copyNumbersNormalized <- normalizeBins(copyNumbers)' >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo 'copyNumbersSmooth <- smoothOutlierBins(copyNumbersNormalized)' >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo 'copyNumbersSegmented <- segmentBins(copyNumbersSmooth, transformFun="sqrt")' >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo 'object <- copyNumbersSegmented' >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo 'template <- objectsampletotemplate(object,index=1)' >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo 'segmentdf <- getadjustedsegments(template, cellularity = 0.25)' >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo 'sqmodel <- squaremodel(template, prows = 150, ptop = 3.3, pbottom = 1.8, ' >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo '                       penalty = 0.5, penploidy = 0.5)' >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo '' >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo 'models <- data.frame(segmentdf)' >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo -e "write.table(models, file.path('${OUTDIR}/${NAME}_segmentation.tsv'), quote = FALSE, " >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo "            sep = '\t', na = '', row.names = FALSE)" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        echo "" >> ${OUTDIR}/ACE_SCRIPT_hg38.R
+        Rscript ${OUTDIR}/ACE_SCRIPT_hg38.R
+    else
+        if [ ! -f ${OUTDIR}/${NAME}_segmentation.tsv ]
+        then
+            Rscript ${OUTDIR}/ACE_SCRIPT_hg38.R
+        fi
+    fi
 fi
 conda deactivate
 
 #Step 2
 echo -e ">> 2ND: The BED file is converting from TSV file using Python module"
 conda activate Bedtools
-cut -f1,2,3,8 ${NAME}_segmentation.tsv | sed -z 's/\t/,/g' > ${NAME}_segmentation_cut.csv
-python3 ${PACKAGE}/Package_Software/Classify_Annotation/TSV2BED.py ${NAME}_segmentation_cut.tsv ${OUTDIR} ${NAME}_segmentation.csv
-sed -z 's/,/\t/g' > ${NAME}_segmentation.bed
-rm ${NAME}_segmentation.csv
+cut -f1,2,3,8 ${OUTDIR}/${NAME}_segmentation.tsv | sed -z 's/\t/,/g' > ${OUTDIR}/${NAME}_segmentation_cut.csv
+python3 ${PACKAGE}/Package_Software/Classify_Annotation/TSV2BED.py ${OUTDIR}/${NAME}_segmentation_cut.csv ${OUTDIR} ${NAME}_segmentation.csv
+sed -z 's/,/\t/g' ${OUTDIR}/${NAME}_segmentation.csv > ${OUTDIR}/${NAME}_segmentation.bed
+rm ${OUTDIR}/${NAME}_segmentation_cut.csv
+rm ${OUTDIR}/${NAME}_segmentation.csv
 
 #Step 3
 echo -e ">> 3RD: The list of dosage-sensitive genes and pathogenic variants are predicting using ClassifyCNV package"
-python3 ${PACKAGE}/ClassifyCNV/ClassifyCNV.py --infile ${OUTDIR}/${NAME}_segmentation.bed --GenomeBuild ${ref} --outdir ${OUTDIR}
+cd ${outdir}
+python3 ${PACKAGE}/ClassifyCNV/ClassifyCNV.py --infile ${NAME}_segmentation.bed --GenomeBuild ${ref}
+cd ${cur_dir}
 conda deactivate
 
 echo -e ">> 4TH: All steps already finish and saved out at; ${OUTDIR}"
