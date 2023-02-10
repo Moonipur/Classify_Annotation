@@ -4,6 +4,12 @@
 for annotating gains and losses reads and predicting list of dosage-sensitive genes
 that affect as pathogenic variant.
 
+# Installation:
+
+  ./Install.sh
+  
+  source ~/.bashrc (find your .bashrc path before use source command)
+
 # Usage: 
 
   CNV_annotation [-i|-o|-r|h]
